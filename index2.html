@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>経済史学習ノート | 日本史・西洋史の重要語句をAIと学ぶ</title>
+    <meta name="description" content="経済史の重要語句（日本経済史・西洋経済史）を学習するためのインタラクティブなノートです。用語解説やAIによる深掘り学習、ミニテスト機能があります。">
+    <meta name="keywords" content="経済史, 日本経済史, 西洋経済史, 試験対策, 学習, 松方財政, 大分岐, 近代世界システム">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-button.active {
+            background-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .modal-backdrop { transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
+        .modal-backdrop.hidden { opacity: 0; visibility: hidden; }
+        .modal-panel { transition: transform 0.3s ease-in-out; }
+        .modal-backdrop.hidden .modal-panel { transform: scale(0.95); }
+        .term-button { transition: all 0.2s ease-in-out; }
+        .term-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .gemini-button { transition: all 0.2s ease-in-out; }
+        .gemini-button:hover {
+            background-color: #eef2ff; /* indigo-50 */
+            transform: translateY(-1px);
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Quiz Styles */
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background-color: white;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .quiz-option:hover:not(:disabled) {
+            background-color: #f9fafb;
+            border-color: #6b7280;
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            color: #15803d;
+            font-weight: 600;
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+            color: #b91c1c;
+        }
+        .quiz-option:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+        #quiz-explanation {
+            margin-top: 16px;
+            padding: 12px;
+            background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-20">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-700">経済史学習ノート</h1>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6">
+        <div class="mb-6 flex justify-center space-x-2 md:space-x-4 bg-white p-2 rounded-xl shadow-sm">
+            <button id="tab-japanese" class="tab-button w-1/2 py-2 px-4 rounded-lg font-semibold transition">日本経済史</button>
+            <button id="tab-western" class="tab-button w-1/2 py-2 px-4 rounded-lg font-semibold transition">西洋経済史</button>
+        </div>
+        <div id="terms-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+    </main>
+
+    <!-- Term Detail Modal -->
+    <div id="modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div id="modal-content" class="modal-panel bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 id="modal-title" class="text-2xl font-bold text-blue-700"></h2>
+                    <button id="modal-close" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="font-semibold text-lg border-b-2 border-blue-200 pb-1 mb-2 text-blue-800">概要</h3>
+                        <p id="modal-summary" class="text-gray-700 leading-relaxed"></p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg border-b-2 border-green-200 pb-1 mb-2 text-green-800">歴史的意義と影響</h3>
+                        <p id="modal-impact" class="text-gray-700 leading-relaxed"></p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg border-b-2 border-purple-200 pb-1 mb-2 text-purple-800">関連用語</h3>
+                        <div id="modal-related" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    <div class="border-t-2 border-gray-200 pt-6">
+                        <h3 class="font-semibold text-lg mb-3 text-indigo-800">✨ Geminiで学習を深める</h3>
+                        <div id="gemini-actions" class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <button class="gemini-button text-sm bg-indigo-100 text-indigo-800 font-semibold py-2 px-3 rounded-lg" data-gemini-action="deeper">より深く学ぶ</button>
+                            <button class="gemini-button text-sm bg-indigo-100 text-indigo-800 font-semibold py-2 px-3 rounded-lg" data-gemini-action="quiz">ミニテスト作成</button>
+                            <button class="gemini-button text-sm bg-indigo-100 text-indigo-800 font-semibold py-2 px-3 rounded-lg" data-gemini-action="context">この時代の他の出来事は？</button>
+                        </div>
+                        <div id="gemini-result" class="mt-4 p-4 border border-indigo-200 rounded-lg bg-gray-50 min-h-[100px]">
+                            AI機能を利用するには、いずれかのボタンを押してAPIキーを設定してください。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="modal-panel bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">APIキーの設定</h2>
+                <p class="text-sm text-gray-600 mb-4">
+                    AI機能（解説、テスト作成など）を利用するには、ご自身のGoogle APIキーが必要です。キーはブラウザ内にのみ保存され、外部には送信されません。
+                </p>
+                <div class="mb-4">
+                    <label for="apiKeyInput" class="block text-sm font-medium text-gray-700 mb-1">Gemini API Key</label>
+                    <input type="password" id="apiKeyInput" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="AIza... から始まるキーを入力">
+                </div>
+                <p class="text-xs text-gray-500 mb-4">
+                    キーをお持ちでない方は、<a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Google AI Studio</a>から無料で取得できます。
+                </p>
+                <div class="flex justify-end space-x-2">
+                    <button id="apiKeyCancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">キャンセル</button>
+                    <button id="apiKeySave" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">保存して実行</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const termsData = {
+            japanese: [
+                { id: 'kaikoku', title: '開国と幕末経済', era: '1850年代〜1860年代', summary: '1854年の日米和親条約以降、日本が鎖国を止めて西欧諸国との通商を開始した時期。主要な輸出品は生糸や茶、輸入品は毛織物や綿織物、武器であった。', impact: '海外との金銀比価の差（日本は金1:銀5、海外は1:15）により、大量の金が流出した。幕府はこれを防ぐため金の含有量を減らした万延小判を発行したが、これが貨幣価値の急落と激しいインフレを引き起こした。また、輸出向け生糸の価格高騰は国内の絹織物業に打撃を与える一方、流通構造を混乱させ、幕府の権威を失墜させる一因となった。', related: ['黒船来航', '日米修好通商条約', '金銀比価', '万延の改鋳', '五品江戸廻送令'] },
+                { id: 'matsukata', title: '松方財政', era: '1880年代', summary: '西南戦争（1877年）の戦費調達のための不換紙幣乱発によるインフレを収束させるため、1881年以降、大蔵卿・松方正義が主導した財政・金融政策。', impact: '増税、歳出削減、官営事業の払い下げといった緊縮財政と紙幣整理により、激しいデフレーション（松方デフレ）が発生。農民は米価下落で困窮し、土地を失い小作農となる者が増加した。一方で、日本銀行の設立（1882年）や銀本位制の確立（1885年）により、近代的な金融制度の基礎が築かれ、通貨価値の安定がその後の「企業勃興」の土台となった。', related: ['西南戦争', '不換紙幣', 'デフレーション', '日本銀行', '銀本位制', '官営事業払下げ', '企業勃興'] },
+                { id: 'senso_keiei', title: '日清・日露戦争と戦後経営', era: '1890年代後半〜1900年代', summary: '日清戦争（1894-95）と日露戦争（1904-05）の勝利を通じて、日本の国際的地位が向上し、産業資本主義と帝国主義が確立された時期の経営政策。', impact: '日清戦争の賠償金（2億テール）を準備金として、1897年に金本位制を確立。これにより円の価値が安定し、国際的な信用が高まり貿易が発展した。また、賠償金や外債を元手に軍備拡張が進められ、官営八幡製鉄所（1901年操業開始）の設立など重化学工業の基礎が築かれた。鉄道国有法（1906年）により主要幹線が国有化され、軍事・経済上の国家統制が強化された。', related: ['下関条約', '金本位制', '貨幣法', '八幡製鉄所', '産業革命', '鉄道国有法', '南満州鉄道株式会社'] },
+                { id: 'taisen_kyoko', title: '第一次大戦と戦後恐慌', era: '1910年代〜1920年代', summary: '第一次世界大戦（1914-18）中、欧州諸国が戦争で生産力を低下させたため、日本がアジア市場で輸出を急増させ、空前の好景気（大戦景気）を経験した時期。', impact: '貿易収支は大幅な黒字となり、日本は債務国から債権国へ転換。「船成金」が生まれるなど景気に沸いたが、急激な物価高騰は米騒動（1918年）を引き起こした。大戦が終結し欧州経済が復興すると日本の輸出は減少し、1920年に反動恐慌が発生。さらに1923年の関東大震災が追い打ちをかけ、日本経済は長期的な不安定期に入った。', related: ['大戦景気', '債権国', '船成金', '米騒動', '反動恐慌', '関東大震災'] },
+                { id: 'showa_kyoko', title: '昭和恐慌と高橋財政', era: '1930年代', summary: '1929年の世界恐慌と、浜口雄幸内閣による金解禁（1930年）が重なり、日本経済が深刻な不況に陥った状態。農産物価格の暴落や失業者の急増を招いた。', impact: '不況を克服するため、犬養毅内閣で蔵相となった高橋是清は金輸出を再禁止し、管理通貨制度へ移行。日銀による国債引き受けを財源として軍事費や公共事業を拡大する積極財政（高橋財政）を展開。これは円安による輸出回復と国内需要創出をもたらし、日本は他国に先駆けて恐慌から脱出した。しかし、軍事費の抑制を図った高橋是清が二・二六事件で暗殺されると、軍部の発言力が強まり、日本は戦時経済体制へと突き進んだ。', related: ['世界恐慌', '金解禁', '井上準之助', '高橋是清', '管理通貨制度', '二・二六事件'] },
+                { id: 'sengo_kaikaku', title: '戦後改革（経済の民主化）', era: '1940年代後半', summary: '第二次世界大戦後、GHQの指令のもとで行われた一連の経済民主化政策。日本の軍国主義の経済的基盤を解体し、経済の民主化を図ることが目的とされた。', impact: '①財閥解体：三井・三菱などの持株会社を解体し、独占的な経済支配を排除。②農地改革：寄生地主制を解体し、多くの小作農を自作農とすることで農村の民主化と安定を図った。③労働三法の制定：労働者の団結権・団体交渉権・争議権を保障し、労働組合の結成を促した。これらの改革は、戦後の日本経済の構造を根本的に変え、その後の高度経済成長の前提条件の一つとなった。', related: ['GHQ', '財閥解体', '農地改革', '労働三法', '傾斜生産方式', 'ドッジ・ライン'] },
+                { id: 'koudo_seicho', title: '高度経済成長', era: '1955年〜1973年', summary: '1955年頃から1973年の石油危機まで続いた、年平均10%を超える驚異的な経済成長期。朝鮮戦争特需（1950-53）をきっかけに本格化した。', impact: '旺盛な民間設備投資（「投資が投資を呼ぶ」）、農村からの豊富な労働力の供給、欧米からの技術革新の導入、高い貯蓄率などを背景に成長。国民所得は飛躍的に増大し、「三種の神器」や「3C」に代表される耐久消費財が普及した。産業構造は重化学工業中心に転換。一方で、大都市への人口集中による過密・過疎問題や、公害問題といった負の側面も顕在化した。1973年の石油危機により終焉を迎えた。', related: ['朝鮮戦争特需', '神武景気', '岩戸景気', '所得倍増計画', 'いざなぎ景気', '国際収支の天井', '石油危機'] }
+            ],
+            western: [
+                { id: 'shogyo_fukkatsu', title: '商業の復活', era: '11世紀〜13世紀', summary: '11世紀以降、中世ヨーロッパで農業生産が増大し、人口が増加したことを背景に商業活動が再活性化した現象。「商業の復活」という言葉は、かつてアンリ・ピレンヌが提唱した「イスラムの地中海支配により商業が一度衰退した」という見方を前提としている。', impact: '研究の進展により、中世初期も商業が完全に停滞していたわけではないことが分かっている。しかし、11世紀以降に交易が質・量ともに拡大したのは事実であり、北イタリア諸都市とフランドル地方を結ぶ遠隔地商業が発展。その結節点となったシャンパーニュの大市では、南北ヨーロッパの物産が取引され、国際的な金融市場も形成された。これが中世都市の発展と、後のヨーロッパ経済の基盤を形成した。', related: ['アンリ・ピレンヌ', '荘園制', 'シャンパーニュの大市', 'ヴェネツィア', 'ハンザ同盟', '中世の危機'] },
+                { id: 'world_system', title: '近代世界システム', era: '16世紀以降', summary: '社会学者イマニュエル・ウォーラーステインが提唱した、16世紀以降に形成された単一の資本主義的な「世界経済」を分析する枠組み。', impact: 'このシステムは、工業製品を生産し政治的に優位な「中核（西欧）」、原料や食料を供給し従属的な地位にある「周辺（植民地など）」、その中間に位置する「半周辺」という、地理的な分業体制と不等価交換（搾取）によって特徴づけられる。国家単位でなく、グローバルなシステムとして歴史を捉える視点を提示し、世界の経済格差の構造的起源を説明しようとした。一方で、西欧中心主義的、経済還元論的であるとの批判もある。', related: ['I.ウォーラーステイン', '従属理論', '中核／周辺／半周辺', '不等価交換', 'A.G.フランク'] },
+                { id: 'price_revolution', title: '価格革命', era: '16世紀', summary: '16世紀のヨーロッパで、物価が2〜3倍に高騰した長期的なインフレーション現象。', impact: '伝統的には、アメリカ大陸から大量の銀が流入したことが主な原因とされてきた（ハミルトン・テーゼ）。しかし、現在では銀の流入だけでなく、人口増加による食料需要の増大が物価上昇のより根本的な要因であったと考えられている。この物価上昇は、実質賃金の低下をもたらし労働者の生活を圧迫した一方、固定地代に依存する封建領主の没落を促し、商工業者など新興階級の台頭を助け、資本主義の発展を準備したとされる。', related: ['大航海時代', '新大陸', '銀', '重商主義', 'ハミルトン・テーゼ', '人口増加'] },
+                { id: 'dutch_economy', title: '最初の近代経済（オランダ）', era: '17世紀', summary: 'J.ド・フリースらが提唱した説で、産業革命期のイギリスではなく、17世紀のオランダこそが「最初の近代経済」であったとする見方。', impact: '工業化ではなく、商業・金融を基盤として持続的成長を開始した点を評価。アムステルダムはバルト海貿易を基盤に「世界の倉庫」となり、東インド会社を通じてアジア貿易を支配した。発達した金融市場、効率的な海運、高い識字率と人的資本、高いエネルギー消費量などを特徴とする。この説は、工業化のみを「近代化」と捉える見方に疑問を呈し、近代経済の多様なあり方を示した。', related: ['J.ド・フリース', 'アムステルダム', 'オランダ東インド会社', '重商主義', '産業革命'] },
+                { id: 'why_britain', title: '産業革命はなぜイギリスで？', era: '18世紀後半〜19世紀前半', summary: '18世紀後半、世界で最初にイギリスで産業革命（持続的な技術革新と工業化）が始まった理由をめぐる、経済史上の中心的な問い。', impact: '様々な学説が存在する。D.ノースは私的所有権の保護など「効率的な経済制度」の確立を、J.モキアは科学と技術が結びついた「有用な知識」の発展を、R.C.アレンは「高賃金と安価な石炭」という独自の要素価格を、K.ポメランツは「石炭と新大陸」という幸運な地理的条件を挙げる。これらの議論は、制度、文化、経済的条件、地理的要因など、多様な側面からこの歴史的転換を説明しようと試みている。', related: ['産業革命', 'R.C.アレン', 'D.ノース', 'J.モキア', 'K.ポメランツ', '大分岐'] },
+                { id: 'great_divergence', title: '大分岐', era: '19世紀', summary: '歴史家ケネス・ポメランツが提唱した、19世紀以降に西ヨーロッパと世界のその他地域との間に生じた巨大な経済格差の出現を指す言葉。', impact: 'ポメランツは、18世紀まで西欧と中国江南地方のようなアジアの先進地域は、市場経済や生活水準の点で大差がなかったと主張。西欧がそこから抜け出せたのは、内在的な優位性ではなく、①近場に石炭が豊富にあったこと、②植民地（新大陸）という資源供給地と過剰人口の「はけ口」があったこと、という2つの「幸運」によるものだと論じた。従来のヨーロッパ中心史観を大きく揺らぶり、世界史におけるアジアの重要性を再評価するきっかけとなった。', related: ['K.ポメランツ', 'カリフォルニア学派', '産業革命', 'ヨーロッパ中心主義', '近代世界システム'] },
+                { id: 'useful_knowledge', title: '有用な知識', era: '18世紀', summary: '経済史家ジョエル・モキアが産業革命の要因として提唱した概念。科学的知識（なぜそうなるか）と技術的知識（どうやるか）が相互にフィードバックし、経済活動に応用される社会的な能力を指す。', impact: 'モキアによれば、18世紀のヨーロッパ、特にイギリスでは、「産業啓蒙」と呼ばれる思想運動を通じて、科学者と技術者・企業家の交流が活発になり、知識の普及と応用が進んだ。これにより、発明や技術改良が継続的に行われる土壌が生まれ、産業革命へと繋がったと主張する。文化や思想といった、経済モデルでは捉えにくい要因の重要性を指摘した点で意義深い。', related: ['J.モキア', '産業革命', '産業啓蒙', '科学革命', '技術革新'] },
+                { id: 'rc_allen', title: 'R.C.アレンの産業革命論', era: '18世紀後半', summary: '経済史家ロバート・C・アレンが提唱した、産業革命がイギリスで起きた要因を経済的インセンティブから説明する理論。', impact: 'アレンは、当時のイギリスが他国と比較して「高賃金」かつ「安価なエネルギー（石炭）」というユニークな要素価格構造を持っていたことを指摘。このため、企業家には労働力を節約し、代わりに資本（機械）と石炭エネルギーを多用するような新技術（蒸気機関や紡績機など）を開発・導入する強い動機が生まれたと論じた。他の国では賃金が安く、こうした労働節約的技術を導入するメリットがなかったため、産業革命はイギリスから始まったと説明する。', related: ['産業革命', '高賃金経済', '労働節約的技術', '蒸気機関', '石炭'] }
+            ]
+        };
+        const japaneseTab = document.getElementById('tab-japanese');
+        const westernTab = document.getElementById('tab-western');
+        const termsContainer = document.getElementById('terms-container');
+        
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalSummary = document.getElementById('modal-summary');
+        const modalImpact = document.getElementById('modal-impact');
+        const modalRelated = document.getElementById('modal-related');
+        const modalClose = document.getElementById('modal-close');
+        
+        const geminiActionsContainer = document.getElementById('gemini-actions');
+        const geminiResultDiv = document.getElementById('gemini-result');
+
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const apiKeySave = document.getElementById('apiKeySave');
+        const apiKeyCancel = document.getElementById('apiKeyCancel');
+        
+        let currentTerm = null;
+        let pendingGeminiAction = null;
+
+        // --- API Key Management ---
+        function getApiKey() {
+            return localStorage.getItem('geminiApiKey');
+        }
+
+        function saveApiKey(key) {
+            localStorage.setItem('geminiApiKey', key);
+        }
+
+        function showApiKeyModal() {
+            apiKeyModal.classList.remove('hidden');
+        }
+
+        function hideApiKeyModal() {
+            apiKeyModal.classList.add('hidden');
+            apiKeyInput.value = '';
+        }
+
+        // --- Main Logic ---
+        function renderTerms(category) {
+            termsContainer.innerHTML = '';
+            const terms = termsData[category];
+            terms.forEach(term => {
+                const button = document.createElement('button');
+                button.className = 'term-button bg-white p-4 rounded-lg shadow-sm text-center font-medium text-gray-700 hover:bg-blue-50';
+                button.textContent = term.title;
+                button.dataset.id = term.id;
+                button.dataset.category = category;
+                termsContainer.appendChild(button);
+            });
+            termsContainer.classList.add('fade-in');
+            setTimeout(() => termsContainer.classList.remove('fade-in'), 500);
+        }
+        
+        function showModal(termId, category) {
+            const term = termsData[category].find(t => t.id === termId);
+            if (!term) return;
+            currentTerm = term;
+            modalTitle.textContent = term.title;
+            modalSummary.innerHTML = term.summary;
+            modalImpact.innerHTML = term.impact;
+            modalRelated.innerHTML = '';
+            term.related.forEach(rel => {
+                const tag = document.createElement('span');
+                tag.className = 'bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full';
+                tag.textContent = rel;
+                modalRelated.appendChild(tag);
+            });
+            geminiResultDiv.innerHTML = 'AI機能を利用するには、いずれかのボタンを押してAPIキーを設定してください。';
+            modal.classList.remove('hidden');
+        }
+
+        function hideModal() {
+            modal.classList.add('hidden');
+            currentTerm = null;
+            pendingGeminiAction = null;
+        }
+
+        async function executeGeminiAction(action, apiKey) {
+             if (!currentTerm || !action || !apiKey) return;
+            
+            let prompt = '';
+            let isQuiz = false;
+
+            switch (action) {
+                case 'deeper':
+                    prompt = `「${currentTerm.title}」という経済史の用語について、大学生が試験勉強で使うことを想定し、その背景、具体的な内容、そして後世への影響を物語のように詳しく、かつ分かりやすく解説してください。`;
+                    break;
+                case 'quiz':
+                    prompt = `経済史の用語「${currentTerm.title}」に関する、大学生レベルの4択クイズを1問、JSON形式で作成してください。形式は {"question": "問題文", "options": ["選択肢1", "選択肢2", "選択肢3", "選択肢4"], "correctIndex": 正解のインデックス(0-3), "explanation": "解説文"} としてください。`;
+                    isQuiz = true;
+                    break;
+                case 'context':
+                    prompt = `経済史の用語「${currentTerm.title}」が中心的なテーマであった時代（およそ${currentTerm.era}）について、世界の他の地域（特にアジア、ヨーロッパ、アメリカ大陸）で起きていた重要な歴史的出来事を5つ、箇条書きで挙げてください。`;
+                    break;
+            }
+
+            if (prompt) {
+                await callGemini(prompt, apiKey, isQuiz);
+            }
+        }
+
+
+        async function callGemini(prompt, apiKey, isQuiz = false) {
+            geminiResultDiv.innerHTML = '<div class="loader"></div>';
+            
+            let chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+            
+            const quizSchema = {
+                type: "OBJECT",
+                properties: {
+                    "question": { "type": "STRING" },
+                    "options": {
+                        "type": "ARRAY",
+                        "items": { "type": "STRING" }
+                    },
+                    "correctIndex": { "type": "INTEGER" },
+                    "explanation": { "type": "STRING" }
+                },
+                required: ["question", "options", "correctIndex", "explanation"]
+            };
+
+            const payload = {
+                contents: chatHistory,
+                ...(isQuiz && {
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: quizSchema
+                    }
+                })
+            };
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    if(response.status === 400){
+                         throw new Error(`APIキーが正しくないか、リクエストに問題があります。`);
+                    }
+                    throw new Error(`APIリクエストに失敗しました。ステータス: ${response.status}`);
+                }
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 && result.candidates[0].content.parts.length > 0) {
+                    const responseText = result.candidates[0].content.parts[0].text;
+                    if (isQuiz) {
+                        renderQuiz(JSON.parse(responseText));
+                    } else {
+                        geminiResultDiv.innerHTML = responseText.replace(/\n/g, '<br>');
+                    }
+                } else {
+                    geminiResultDiv.textContent = '有効な回答を生成できませんでした。APIキーが正しいか確認してください。';
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                geminiResultDiv.textContent = `エラーが発生しました: ${error.message} APIキーが有効かご確認ください。`;
+            }
+        }
+        
+        function renderQuiz(quizData) {
+            geminiResultDiv.innerHTML = '';
+
+            const questionEl = document.createElement('p');
+            questionEl.className = 'font-semibold mb-4';
+            questionEl.textContent = quizData.question;
+            geminiResultDiv.appendChild(questionEl);
+            
+            const optionsContainer = document.createElement('div');
+            quizData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'quiz-option';
+                button.textContent = `${index + 1}. ${option}`;
+                button.dataset.index = index;
+                optionsContainer.appendChild(button);
+            });
+            geminiResultDiv.appendChild(optionsContainer);
+            
+            optionsContainer.addEventListener('click', (e) => {
+                if (!e.target.matches('.quiz-option')) return;
+                
+                const selectedIndex = parseInt(e.target.dataset.index, 10);
+                const correctIndex = quizData.correctIndex;
+
+                Array.from(optionsContainer.children).forEach((button, index) => {
+                    button.disabled = true;
+                    if (index === correctIndex) {
+                        button.classList.add('correct');
+                    } else if (index === selectedIndex) {
+                        button.classList.add('incorrect');
+                    }
+                });
+
+                const explanationEl = document.createElement('div');
+                explanationEl.id = 'quiz-explanation';
+                explanationEl.innerHTML = `<strong>解説：</strong> ${quizData.explanation}`;
+                geminiResultDiv.appendChild(explanationEl);
+            }, { once: true });
+        }
+
+        // --- Event Listeners ---
+        geminiActionsContainer.addEventListener('click', (e) => {
+            const button = e.target.closest('.gemini-button');
+            if (!button) return;
+
+            const action = button.dataset.geminiAction;
+            const apiKey = getApiKey();
+
+            if (apiKey) {
+                executeGeminiAction(action, apiKey);
+            } else {
+                pendingGeminiAction = action;
+                showApiKeyModal();
+            }
+        });
+
+        apiKeySave.addEventListener('click', () => {
+            const newApiKey = apiKeyInput.value.trim();
+            if (newApiKey) {
+                saveApiKey(newApiKey);
+                hideApiKeyModal();
+                if (pendingGeminiAction) {
+                    executeGeminiAction(pendingGeminiAction, newApiKey);
+                    pendingGeminiAction = null; 
+                }
+            } else {
+                alert('APIキーを入力してください。');
+            }
+        });
+        
+        apiKeyCancel.addEventListener('click', () => {
+            hideApiKeyModal();
+            pendingGeminiAction = null;
+        });
+        
+        japaneseTab.addEventListener('click', () => {
+            japaneseTab.classList.add('active');
+            westernTab.classList.remove('active');
+            renderTerms('japanese');
+        });
+
+        westernTab.addEventListener('click', () => {
+            westernTab.classList.add('active');
+            japaneseTab.classList.remove('active');
+            renderTerms('western');
+        });
+
+        termsContainer.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const { id, category } = e.target.dataset;
+                showModal(id, category);
+            }
+        });
+
+        modalClose.addEventListener('click', hideModal);
+        [modal, apiKeyModal].forEach(m => {
+            m.addEventListener('click', (e) => {
+                if (e.target === m) {
+                    if(m.id === 'modal') hideModal();
+                    if(m.id === 'apiKeyModal') hideApiKeyModal();
+                }
+            });
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if(!modal.classList.contains('hidden')) hideModal();
+                if(!apiKeyModal.classList.contains('hidden')) hideApiKeyModal();
+            }
+        });
+        
+        // Initial Load
+        japaneseTab.click();
+    </script>
+</body>
+</html>
