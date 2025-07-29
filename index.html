@@ -52,44 +52,18 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Quiz Styles */
         .quiz-option {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background-color: white;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
+            display: block; width: 100%; text-align: left; padding: 12px 16px; margin-bottom: 8px;
+            border: 1px solid #d1d5db; border-radius: 8px; background-color: white;
+            transition: all 0.2s ease-in-out; cursor: pointer;
         }
-        .quiz-option:hover:not(:disabled) {
-            background-color: #f9fafb;
-            border-color: #6b7280;
-        }
-        .quiz-option.correct {
-            background-color: #dcfce7;
-            border-color: #22c55e;
-            color: #15803d;
-            font-weight: 600;
-        }
-        .quiz-option.incorrect {
-            background-color: #fee2e2;
-            border-color: #ef4444;
-            color: #b91c1c;
-        }
-        .quiz-option:disabled {
-            cursor: not-allowed;
-            opacity: 0.8;
-        }
+        .quiz-option:hover:not(:disabled) { background-color: #f9fafb; border-color: #6b7280; }
+        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; color: #15803d; font-weight: 600; }
+        .quiz-option.incorrect { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+        .quiz-option:disabled { cursor: not-allowed; opacity: 0.8; }
         #quiz-explanation {
-            margin-top: 16px;
-            padding: 12px;
-            background-color: #f3f4f6;
-            border-left: 4px solid #3b82f6;
-            border-radius: 4px;
+            margin-top: 16px; padding: 12px; background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6; border-radius: 4px;
         }
     </style>
 </head>
@@ -110,22 +84,21 @@
     </main>
 
     <!-- Term Detail Modal -->
-    <div id="modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+    <div id="modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 hidden">
         <div id="modal-content" class="modal-panel bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <!-- Main modal content is injected by JS -->
         </div>
     </div>
     
     <!-- Sub Term Modal -->
-    <div id="subModal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-40 hidden">
+    <div id="subModal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center p-4 z-50 hidden">
         <div id="subModal-content" class="modal-panel bg-white rounded-xl shadow-2xl w-full max-w-lg">
              <!-- Sub modal content is injected by JS -->
         </div>
     </div>
 
-
     <!-- API Key Modal -->
-    <div id="apiKeyModal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+    <div id="apiKeyModal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-60 hidden">
         <div class="modal-panel bg-white rounded-xl shadow-2xl w-full max-w-md">
             <div class="p-6">
                 <h2 class="text-xl font-bold text-gray-800 mb-2">APIキーの設定</h2>
@@ -153,7 +126,7 @@
 
     <script>
         // --- DATA ---
-        const termsData = {
+        const termsData = { /* Main terms data remains the same */ 
             japanese: [
                 { id: 'kaikoku', title: '開国と幕末経済', era: '1850年代〜1860年代', summary: '1854年の日米和親条約以降、日本が鎖国を止めて西欧諸国との通商を開始した時期。主要な輸出品は生糸や茶、輸入品は毛織物や綿織物、武器であった。', impact: '海外との金銀比価の差（日本は金1:銀5、海外は1:15）により、大量の金が流出した。幕府はこれを防ぐため金の含有量を減らした万延小判を発行したが、これが貨幣価値の急落と激しいインフレを引き起こした。また、輸出向け生糸の価格高騰は国内の絹織物業に打撃を与える一方、流通構造を混乱させ、幕府の権威を失墜させる一因となった。', related: ['黒船来航', '日米修好通商条約', '金銀比価', '万延の改鋳', '五品江戸廻送令'] },
                 { id: 'matsukata', title: '松方財政', era: '1880年代', summary: '西南戦争（1877年）の戦費調達のための不換紙幣乱発によるインフレを収束させるため、1881年以降、大蔵卿・松方正義が主導した財政・金融政策。', impact: '増税、歳出削減、官営事業の払い下げといった緊縮財政と紙幣整理により、激しいデフレーション（松方デフレ）が発生。農民は米価下落で困窮し、土地を失い小作農となる者が増加した。一方で、日本銀行の設立（1882年）や銀本位制の確立（1885年）により、近代的な金融制度の基礎が築かれ、通貨価値の安定がその後の「企業勃興」の土台となった。', related: ['西南戦争', '不換紙幣', 'デフレーション', '日本銀行', '銀本位制', '官営事業払下げ', '企業勃興'] },
@@ -175,66 +148,63 @@
             ]
         };
 
-        const subTermsData = {
-            // Japanese History Sub Terms
-            '黒船来航': { summary: '1853年、ペリー提督率いるアメリカ艦隊が浦賀に来航した事件。', impact: '日本の鎖国政策に終止符を打つ契機となり、翌年の日米和親条約締結へと繋がった。' },
-            '日米修好通商条約': { summary: '1858年に日米間で締結された不平等条約。', impact: '領事裁判権を認め、関税自主権がないなど、日本にとって不利な内容を含んでいた。' },
-            '金銀比価': { summary: '金と銀の交換比率。', impact: '開国当時、日本では金に対して銀が非常に高く評価されており（金1:銀5）、海外（1:15）との差から大量の金が海外に流出した。' },
-            '万延の改鋳': { summary: '1860年、金の流出を防ぐために幕府が行った貨幣の改鋳。', impact: '小判の金の含有量を大幅に減らしたため、激しいインフレーションを引き起こし、経済を混乱させた。' },
-            '五品江戸廻送令': { summary: '1860年、幕府が発した貿易統制令。', impact: '生糸など5品目を江戸の問屋経由で輸出するよう命じたが、列強の反対と商人の抵抗で効果は薄かった。' },
-            '西南戦争': { summary: '1877年、西郷隆盛を指導者として鹿児島の士族が起こした最後の武力反乱。', impact: '政府はこの鎮圧に巨額の戦費を要し、不換紙幣を増発したため、深刻なインフレを招いた。' },
-            '不換紙幣': { summary: '金や銀との交換が保証されていない紙幣。', impact: '政府が発行しやすく財源確保に便利だが、乱発すると価値が下落しインフレの原因となる。' },
-            'デフレーション': { summary: '物価が持続的に下落する経済状態。', impact: '松方財政下では、農産物価格が暴落し農民の生活を圧迫する一方、通貨価値の安定に繋がった。' },
-            '日本銀行': { summary: '1882年に設立された日本の中央銀行。', impact: '唯一の発券銀行として通貨の安定を図り、近代的な金融システムの核となった。' },
-            '銀本位制': { summary: '通貨の価値を銀に結びつける制度。', impact: '松方財政により確立され、日本の通貨価値を安定させたが、国際的には金本位制が主流であった。' },
-            '官営事業払下げ': { summary: '政府が経営していた工場や鉱山を民間に売却した政策。', impact: '財政赤字の解消と、三井・三菱などの政商が財閥を形成するきっかけとなった。' },
-            '企業勃興': { summary: '1880年代後半、紡績業や鉄道業を中心に株式会社の設立が相次いだ時期。', impact: '松方財政による金融安定を背景に、日本の産業革命が本格的に始まった。' },
-            '下関条約': { summary: '1895年、日清戦争の講和条約。', impact: '日本は台湾などを得、多額の賠償金を獲得した。この賠償金が金本位制の確立など戦後経営の基盤となった。' },
-            '金本位制': { summary: '通貨の価値を金に結びつける制度。', impact: '1897年に確立。円の価値が国際的に安定し、貿易の発展と海外からの資本導入を促進した。' },
-            '貨幣法': { summary: '1897年に制定され、金本位制を定めた法律。', impact: '1円=金0.75gと定め、日本の通貨制度を国際基準に合わせた。' },
-            '八幡製鉄所': { summary: '1901年に操業を開始した官営の製鉄所。', impact: '日本の重工業の基礎を築き、「鉄は国家なり」のスローガンのもと、軍事力と産業の発展を支えた。' },
-            '鉄道国有法': { summary: '1906年、主要な私鉄17社を国が買収した法律。', impact: '軍事輸送の円滑化と全国的な鉄道網の統一を図る目的があった。' },
-            '南満州鉄道株式会社': { summary: '1906年、日露戦争で得た利権を元に設立された半官半民の国策会社。', impact: '満州の鉄道経営だけでなく、鉱山開発や都市経営も行い、日本の大陸進出の拠点となった。' },
-            '大戦景気': { summary: '第一次世界大戦中に日本が経験した好景気。', impact: '輸出が急増し、重化学工業が発展。日本は債務国から債権国へと転換した。' },
-            '債権国': { summary: '対外的に貸しているお金が借りているお金を上回る国。', impact: '第一次大戦を通じて、日本は初めて債権国となり、国際的な経済的地位が向上した。' },
-            '船成金': { summary: '大戦景気中、海運業で巨万の富を築いた人々。', impact: '好景気の象徴であったが、急激な富の集中は社会的な格差を拡大させた。' },
-            '米騒動': { summary: '1918年、米価の急騰に抗議した民衆が全国で起こした暴動。', impact: '大戦景気下のインフレとシベリア出兵を見越した米の買い占めが原因。本格的な政党内閣である原敬内閣成立のきっかけとなった。' },
-            '反動恐慌': { summary: '1920年、第一次世界大戦後の反動で生じた恐慌。', impact: '株価や綿糸・生糸の価格が暴落し、多くの銀行や企業が破綻。日本経済は長期の停滞期に入った。' },
-            '関東大震災': { summary: '1923年に発生した大地震。', impact: '首都圏に壊滅的な被害をもたらし、震災手形の不良債権化が後の金融恐慌の原因となった。' },
-            '世界恐慌': { summary: '1929年、ニューヨークの株価暴落から始まった世界的な経済危機。', impact: '日本の昭和恐慌の直接的な引き金となり、世界経済のブロック化と第二次世界大戦への道を開いた。' },
-            '金解禁': { summary: '1930年、国際的な金本位制へ復帰するために行われた政策。', impact: '世界恐慌のタイミングと重なったため、正貨の流出とデフレを深刻化させ、昭和恐慌を招いた。' },
-            '井上準之助': { summary: '浜口雄幸内閣の蔵相として金解禁を断行した人物。', impact: '緊縮財政とデフレ政策を推進したが、経済の混乱を招き、後に血盟団事件で暗殺された。' },
-            '高橋是清': { summary: '犬養毅内閣などの蔵相を務め、昭和恐慌からの脱出を主導した政治家。', impact: '金輸出再禁止や積極財政により景気を回復させたが、軍事費削減を巡り軍部と対立し二・二六事件で暗殺された。' },
-            '管理通貨制度': { summary: '金との兌換を停止し、中央銀行が通貨の発行量を管理する制度。', impact: '高橋財政下で導入され、金融政策の自由度を高め、積極的な財政出動を可能にした。' },
-            '二・二六事件': { summary: '1936年、陸軍の青年将校らが起こしたクーデター未遂事件。', impact: '高橋是清らが殺害され、事件後、軍部の政治的発言力が決定的に強まり、日本は戦時体制へと傾斜していった。' },
-            'GHQ': { summary: '連合国軍総司令部。戦後日本の占領政策を実施した機関。', impact: '財閥解体、農地改革、労働改革など、日本の経済・社会構造を根本的に変える「経済の民主化」を指令した。' },
-            '財閥解体': { summary: '三井・三菱など、同族支配による巨大企業グループを解体した政策。', impact: '経済力の集中を排除し、競争的な市場経済の基礎を築いた。' },
-            '農地改革': { summary: '地主が持つ小作地を政府が安く買い上げ、小作人に売り渡した改革。', impact: '寄生地主制を解体し、自作農を創出することで農村の民主化と安定に貢献した。' },
-
-            // Western History Sub Terms
-            'アンリ・ピレンヌ': { summary: 'ベルギーの歴史家。', impact: '「マホメットなくしてシャルルマーニュなし」と述べ、イスラムの台頭が西欧世界の形成に決定的影響を与えたと主張した。' },
-            '荘園制': { summary: '中世西欧の基本的な社会経済単位。', impact: '領主が土地と農民を支配し、農民は賦役や貢納の義務を負った。自給自足を基本としたが、地域経済の基盤でもあった。' },
-            'シャンパーニュの大市': { summary: '中世フランスのシャンパーニュ地方で開かれた大規模な定期市。', impact: '北ヨーロッパと地中海を結ぶ遠隔地商業の中心地として栄え、国際的な商品取引や為替手形の決済が行われた。' },
-            'ヴェネツィア': { summary: '中世に栄えた北イタリアの都市国家。', impact: '東方貿易（レヴァント貿易）を独占し、香辛料などの奢侈品をヨーロッパにもたらして莫大な富を築いた。' },
-            'ハンザ同盟': { summary: '中世後期に北ドイツの諸都市が結成した都市同盟。', impact: 'バルト海・北海交易を支配し、リューベックを盟主として最盛期には100以上の都市が加盟した。' },
-            '中世の危機': { summary: '14世紀のヨーロッパを襲った飢饉、黒死病（ペスト）、戦争による社会・経済の混乱期。', impact: '人口が激減し封建社会は大きく揺らいだが、一方で労働力不足から農民の地位が向上し、農奴解放が進むなど、近代社会への移行を促す契機ともなった。' },
-            'I.ウォーラーステイン': { summary: 'アメリカの社会学者。', impact: '「近代世界システム」論を提唱し、世界を「中核」「周辺」「半周辺」に分け、その搾取的な関係性から世界の経済構造を分析した。' },
-            '従属理論': { summary: '発展途上国の低開発の原因を、先進国による搾取的な国際経済構造に求める理論。', impact: 'ウォーラーステインの近代世界システム論に大きな影響を与えた。' },
-            '中核／周辺／半周辺': { summary: '近代世界システム論における空間的な分業構造の区分。', impact: '「中核」が工業生産、「周辺」が原料供給を担い、両者の間には不等価交換の関係が存在するとされる。' },
-            '不等価交換': { summary: '労働価値の異なる商品が、市場で等価であるかのように交換されること。', impact: '近代世界システム論では、中核が周辺から安価な労働力によって生産された商品を輸入することで、富を搾取していると説明される。' },
-            'A.G.フランク': { summary: 'ドイツの経済史家・社会学者。', impact: '従属理論の主要な論者の一人。ヨーロッパ中心史観を批判し、近代以前からアジアを中心とする世界システムが存在したと主張した（リオリエント）。' },
-            '大航海時代': { summary: '15世紀半ばから17世紀半ばにかけての、ヨーロッパ人による大規模な航海が行われた時代。', impact: 'アメリカ大陸の「発見」やインド航路の開拓につながり、世界の一体化（グローバリゼーション）が始まった。' },
-            '新大陸': { summary: '大航海時代にヨーロッパ人によって「発見」された南北アメリカ大陸のこと。', impact: 'ヨーロッパに銀やジャガイモ、トウモロコシなどをもたらし、世界経済と食文化に大きな影響を与えた。' },
-            '銀': { summary: '貴金属の一種。', impact: '16世紀、ポトシ銀山など新大陸から大量の銀がヨーロッパに流入し、価格革命の一因となった。またアジアとの貿易の主要な決済手段でもあった。' },
-            '重商主義': { summary: '絶対王政期ヨーロッパの経済政策思想。', impact: '国家の富は金銀の量で決まると考え、輸入抑制と輸出促進によって貿易黒字を追求し、国富の増大を図った。' },
-            'J.ド・フリース': { summary: 'アメリカの経済史家。', impact: '産業革命以前の17世紀オランダ経済を分析し、商業・金融を基盤とした「最初の近代経済」であったと論じた。' },
-            'アムステルダム': { summary: '17世紀に世界の商業・金融の中心として栄えたオランダの都市。', impact: '「世界の倉庫」と呼ばれ、バルト海貿易やアジア貿易の拠点として、また証券取引所が設立されるなど金融の中心地として繁栄した。' },
-            'オランダ東インド会社': { summary: '1602年に設立された世界初の株式会社。', impact: '国家から与えられた特権を背景に、アジアにおける香辛料貿易を独占し、オランダの繁栄を支えた。' },
-            'D.ノース': { summary: 'アメリカの経済学者、ノーベル経済学賞受賞者。', impact: '私的所有権の保護など、取引費用を削減する「効率的な経済制度」の確立こそが経済成長の根本的な要因であると主張した。' },
-            'J.モキア': { summary: 'アメリカの経済史家。', impact: '産業革命の原因として、科学的知識と技術的知識が結びついた「有用な知識」の発展と普及を重視した。' },
-            'K.ポメランツ': { summary: 'アメリカの歴史家、「カリフォルニア学派」の中心人物。', impact: '「大分岐」の概念を提唱し、19世紀に西洋とアジアの間に巨大な経済格差が生まれた原因を、石炭と新大陸という偶然の要因に求めた。' },
-            'カリフォルニア学派': { summary: 'ヨーロッパ中心史観を批判し、近世におけるアジア経済の高い生産性やダイナミズムを主張する米国の歴史家グループ。', impact: 'ポメランツらが代表。グローバル・ヒストリー研究に大きな影響を与えた。' },
-            'ヨーロッパ中心主義': { summary: 'ヨーロッパの歴史や価値観を普遍的な基準とみなし、他の地域をそれより劣ったものとして捉える歴史観。', impact: 'カリフォルニア学派などから強く批判され、今日のグローバル・ヒストリー研究では克服すべき課題とされている。' },
+        const subTermsData = { /* Sub-terms data with added 'related' key */ 
+            '黒船来航': { summary: '1853年、ペリー提督率いるアメリカ艦隊が浦賀に来航した事件。', impact: '日本の鎖国政策に終止符を打つ契機となり、翌年の日米和親条約締結へと繋がった。', related: ['日米修好通商条約', '開国と幕末経済'] },
+            '日米修好通商条約': { summary: '1858年に日米間で締結された不平等条約。', impact: '領事裁判権を認め、関税自主権がないなど、日本にとって不利な内容を含んでいた。', related: ['黒船来航', '金銀比価'] },
+            '金銀比価': { summary: '金と銀の交換比率。', impact: '開国当時、日本では金に対して銀が非常に高く評価されており（金1:銀5）、海外（1:15）との差から大量の金が海外に流出した。', related: ['万延の改鋳', '開国と幕末経済'] },
+            '万延の改鋳': { summary: '1860年、金の流出を防ぐために幕府が行った貨幣の改鋳。', impact: '小判の金の含有量を大幅に減らしたため、激しいインフレーションを引き起こし、経済を混乱させた。', related: ['金銀比価', 'インフレーション'] },
+            '五品江戸廻送令': { summary: '1860年、幕府が発した貿易統制令。', impact: '生糸など5品目を江戸の問屋経由で輸出するよう命じたが、列強の反対と商人の抵抗で効果は薄かった。', related: ['開国と幕末経済'] },
+            '西南戦争': { summary: '1877年、西郷隆盛を指導者として鹿児島の士族が起こした最後の武力反乱。', impact: '政府はこの鎮圧に巨額の戦費を要し、不換紙幣を増発したため、深刻なインフレを招いた。', related: ['松方財政', '不換紙幣'] },
+            '不換紙幣': { summary: '金や銀との交換が保証されていない紙幣。', impact: '政府が発行しやすく財源確保に便利だが、乱発すると価値が下落しインフレの原因となる。', related: ['インフレーション', '管理通貨制度'] },
+            'デフレーション': { summary: '物価が持続的に下落する経済状態。', impact: '松方財政下では、農産物価格が暴落し農民の生活を圧迫する一方、通貨価値の安定に繋がった。', related: ['松方財政', '金解禁'] },
+            '日本銀行': { summary: '1882年に設立された日本の中央銀行。', impact: '唯一の発券銀行として通貨の安定を図り、近代的な金融システムの核となった。', related: ['松方財政', '中央銀行'] },
+            '銀本位制': { summary: '通貨の価値を銀に結びつける制度。', impact: '松方財政により確立され、日本の通貨価値を安定させたが、国際的には金本位制が主流であった。', related: ['金本位制', '松方財政'] },
+            '官営事業払下げ': { summary: '政府が経営していた工場や鉱山を民間に売却した政策。', impact: '財政赤字の解消と、三井・三菱などの政商が財閥を形成するきっかけとなった。', related: ['松方財政', '財閥解体'] },
+            '企業勃興': { summary: '1880年代後半、紡績業や鉄道業を中心に株式会社の設立が相次いだ時期。', impact: '松方財政による金融安定を背景に、日本の産業革命が本格的に始まった。', related: ['松方財政', '産業革命'] },
+            '下関条約': { summary: '1895年、日清戦争の講和条約。', impact: '日本は台湾などを得、多額の賠償金を獲得した。この賠償金が金本位制の確立など戦後経営の基盤となった。', related: ['日清・日露戦争と戦後経営', '金本位制'] },
+            '金本位制': { summary: '通貨の価値を金に結びつける制度。', impact: '1897年に確立。円の価値が国際的に安定し、貿易の発展と海外からの資本導入を促進した。', related: ['銀本位制', '貨幣法', '金解禁'] },
+            '貨幣法': { summary: '1897年に制定され、金本位制を定めた法律。', impact: '1円=金0.75gと定め、日本の通貨制度を国際基準に合わせた。', related: ['金本位制'] },
+            '八幡製鉄所': { summary: '1901年に操業を開始した官営の製鉄所。', impact: '日本の重工業の基礎を築き、「鉄は国家なり」のスローガンのもと、軍事力と産業の発展を支えた。', related: ['日清・日露戦争と戦後経営', '重工業'] },
+            '鉄道国有法': { summary: '1906年、主要な私鉄17社を国が買収した法律。', impact: '軍事輸送の円滑化と全国的な鉄道網の統一を図る目的があった。', related: ['日清・日露戦争と戦後経営'] },
+            '南満州鉄道株式会社': { summary: '1906年、日露戦争で得た利権を元に設立された半官半民の国策会社。', impact: '満州の鉄道経営だけでなく、鉱山開発や都市経営も行い、日本の大陸進出の拠点となった。', related: ['日清・日露戦争と戦後経営'] },
+            '大戦景気': { summary: '第一次世界大戦中に日本が経験した好景気。', impact: '輸出が急増し、重化学工業が発展。日本は債務国から債権国へと転換した。', related: ['第一次大戦と戦後恐慌', '債権国'] },
+            '債権国': { summary: '対外的に貸しているお金が借りているお金を上回る国。', impact: '第一次大戦を通じて、日本は初めて債権国となり、国際的な経済的地位が向上した。', related: ['大戦景気'] },
+            '船成金': { summary: '大戦景気中、海運業で巨万の富を築いた人々。', impact: '好景気の象徴であったが、急激な富の集中は社会的な格差を拡大させた。', related: ['大戦景気'] },
+            '米騒動': { summary: '1918年、米価の急騰に抗議した民衆が全国で起こした暴動。', impact: '大戦景気下のインフレとシベリア出兵を見越した米の買い占めが原因。本格的な政党内閣である原敬内閣成立のきっかけとなった。', related: ['第一次大戦と戦後恐慌', 'インフレーション'] },
+            '反動恐慌': { summary: '1920年、第一次世界大戦後の反動で生じた恐慌。', impact: '株価や綿糸・生糸の価格が暴落し、多くの銀行や企業が破綻。日本経済は長期の停滞期に入った。', related: ['第一次大戦と戦後恐慌'] },
+            '関東大震災': { summary: '1923年に発生した大地震。', impact: '首都圏に壊滅的な被害をもたらし、震災手形の不良債権化が後の金融恐慌の原因となった。', related: ['第一次大戦と戦後恐慌'] },
+            '世界恐慌': { summary: '1929年、ニューヨークの株価暴落から始まった世界的な経済危機。', impact: '日本の昭和恐慌の直接的な引き金となり、世界経済のブロック化と第二次世界大戦への道を開いた。', related: ['昭和恐慌と高橋財政'] },
+            '金解禁': { summary: '1930年、国際的な金本位制へ復帰するために行われた政策。', impact: '世界恐慌のタイミングと重なったため、正貨の流出とデフレを深刻化させ、昭和恐慌を招いた。', related: ['昭和恐慌と高橋財政', '井上準之助', 'デフレーション'] },
+            '井上準之助': { summary: '浜口雄幸内閣の蔵相として金解禁を断行した人物。', impact: '緊縮財政とデフレ政策を推進したが、経済の混乱を招き、後に血盟団事件で暗殺された。', related: ['金解禁', '高橋是清'] },
+            '高橋是清': { summary: '犬養毅内閣などの蔵相を務め、昭和恐慌からの脱出を主導した政治家。', impact: '金輸出再禁止や積極財政により景気を回復させたが、軍事費削減を巡り軍部と対立し二・二六事件で暗殺された。', related: ['昭和恐慌と高橋財政', '管理通貨制度', '二・二六事件'] },
+            '管理通貨制度': { summary: '金との兌換を停止し、中央銀行が通貨の発行量を管理する制度。', impact: '高橋財政下で導入され、金融政策の自由度を高め、積極的な財政出動を可能にした。', related: ['高橋是清', '不換紙幣'] },
+            '二・二六事件': { summary: '1936年、陸軍の青年将校らが起こしたクーデター未遂事件。', impact: '高橋是清らが殺害され、事件後、軍部の政治的発言力が決定的に強まり、日本は戦時体制へと傾斜していった。', related: ['高橋是清'] },
+            'GHQ': { summary: '連合国軍総司令部。戦後日本の占領政策を実施した機関。', impact: '財閥解体、農地改革、労働改革など、日本の経済・社会構造を根本的に変える「経済の民主化」を指令した。', related: ['戦後改革（経済の民主化）'] },
+            '財閥解体': { summary: '三井・三菱など、同族支配による巨大企業グループを解体した政策。', impact: '経済力の集中を排除し、競争的な市場経済の基礎を築いた。', related: ['戦後改革（経済の民主化）', '官営事業払下げ'] },
+            '農地改革': { summary: '地主が持つ小作地を政府が安く買い上げ、小作人に売り渡した改革。', impact: '寄生地主制を解体し、自作農を創出することで農村の民主化と安定に貢献した。', related: ['戦後改革（経済の民主化）'] },
+            'アンリ・ピレンヌ': { summary: 'ベルギーの歴史家。', impact: '「マホメットなくしてシャルルマーニュなし」と述べ、イスラムの台頭が西欧世界の形成に決定的影響を与えたと主張した。', related: ['商業の復活'] },
+            '荘園制': { summary: '中世西欧の基本的な社会経済単位。', impact: '領主が土地と農民を支配し、農民は賦役や貢納の義務を負った。自給自足を基本としたが、地域経済の基盤でもあった。', related: ['商業の復活', '中世の危機'] },
+            'シャンパーニュの大市': { summary: '中世フランスのシャンパーニュ地方で開かれた大規模な定期市。', impact: '北ヨーロッパと地中海を結ぶ遠隔地商業の中心地として栄え、国際的な商品取引や為替手形の決済が行われた。', related: ['商業の復活', 'ヴェネツィア'] },
+            'ヴェネツィア': { summary: '中世に栄えた北イタリアの都市国家。', impact: '東方貿易（レヴァント貿易）を独占し、香辛料などの奢侈品をヨーロッパにもたらして莫大な富を築いた。', related: ['商業の復活', 'ハンザ同盟'] },
+            'ハンザ同盟': { summary: '中世後期に北ドイツの諸都市が結成した都市同盟。', impact: 'バルト海・北海交易を支配し、リューベックを盟主として最盛期には100以上の都市が加盟した。', related: ['商業の復活', 'ヴェネツィア'] },
+            '中世の危機': { summary: '14世紀のヨーロッパを襲った飢饉、黒死病（ペスト）、戦争による社会・経済の混乱期。', impact: '人口が激減し封建社会は大きく揺らいだが、一方で労働力不足から農民の地位が向上し、農奴解放が進むなど、近代社会への移行を促す契機ともなった。', related: ['荘園制'] },
+            'I.ウォーラーステイン': { summary: 'アメリカの社会学者。', impact: '「近代世界システム」論を提唱し、世界を「中核」「周辺」「半周辺」に分け、その搾取的な関係性から世界の経済構造を分析した。', related: ['近代世界システム', '従属理論'] },
+            '従属理論': { summary: '発展途上国の低開発の原因を、先進国による搾取的な国際経済構造に求める理論。', impact: 'ウォーラーステインの近代世界システム論に大きな影響を与えた。', related: ['I.ウォーラーステイン', 'A.G.フランク'] },
+            '中核／周辺／半周辺': { summary: '近代世界システム論における空間的な分業構造の区分。', impact: '「中核」が工業生産、「周辺」が原料供給を担い、両者の間には不等価交換の関係が存在するとされる。', related: ['近代世界システム'] },
+            '不等価交換': { summary: '労働価値の異なる商品が、市場で等価であるかのように交換されること。', impact: '近代世界システム論では、中核が周辺から安価な労働力によって生産された商品を輸入することで、富を搾取していると説明される。', related: ['近代世界システム'] },
+            'A.G.フランク': { summary: 'ドイツの経済史家・社会学者。', impact: '従属理論の主要な論者の一人。ヨーロッパ中心史観を批判し、近代以前からアジアを中心とする世界システムが存在したと主張した（リオリント）。', related: ['近代世界システム', '従属理論'] },
+            '大航海時代': { summary: '15世紀半ばから17世紀半ばにかけての、ヨーロッパ人による大規模な航海が行われた時代。', impact: 'アメリカ大陸の「発見」やインド航路の開拓につながり、世界の一体化（グローバリゼーション）が始まった。', related: ['価格革命', '重商主義'] },
+            '新大陸': { summary: '大航海時代にヨーロッパ人によって「発見」された南北アメリカ大陸のこと。', impact: 'ヨーロッパに銀やジャガイモ、トウモロコシなどをもたらし、世界経済と食文化に大きな影響を与えた。', related: ['価格革命', '大分岐'] },
+            '銀': { summary: '貴金属の一種。', impact: '16世紀、ポトシ銀山など新大陸から大量の銀がヨーロッパに流入し、価格革命の一因となった。またアジアとの貿易の主要な決済手段でもあった。', related: ['価格革命'] },
+            '重商主義': { summary: '絶対王政期ヨーロッパの経済政策思想。', impact: '国家の富は金銀の量で決まると考え、輸入抑制と輸出促進によって貿易黒字を追求し、国富の増大を図った。', related: ['価格革命', '大航海時代'] },
+            'J.ド・フリース': { summary: 'アメリカの経済史家。', impact: '産業革命以前の17世紀オランダ経済を分析し、商業・金融を基盤とした「最初の近代経済」であったと論じた。', related: ['最初の近代経済（オランダ）'] },
+            'アムステルダム': { summary: '17世紀に世界の商業・金融の中心として栄えたオランダの都市。', impact: '「世界の倉庫」と呼ばれ、バルト海貿易やアジア貿易の拠点として、また証券取引所が設立されるなど金融の中心地として繁栄した。', related: ['最初の近代経済（オランダ）'] },
+            'オランダ東インド会社': { summary: '1602年に設立された世界初の株式会社。', impact: '国家から与えられた特権を背景に、アジアにおける香辛料貿易を独占し、オランダの繁栄を支えた。', related: ['最初の近代経済（オランダ）'] },
+            'D.ノース': { summary: 'アメリカの経済学者、ノーベル経済学賞受賞者。', impact: '私的所有権の保護など、取引費用を削減する「効率的な経済制度」の確立こそが経済成長の根本的な要因であると主張した。', related: ['産業革命はなぜイギリスで？'] },
+            'J.モキア': { summary: 'アメリカの経済史家。', impact: '産業革命の原因として、科学的知識と技術的知識が結びついた「有用な知識」の発展と普及を重視した。', related: ['産業革命はなぜイギリスで？', '有用な知識'] },
+            'K.ポメランツ': { summary: 'アメリカの歴史家、「カリフォルニア学派」の中心人物。', impact: '「大分岐」の概念を提唱し、19世紀に西洋とアジアの間に巨大な経済格差が生まれた原因を、石炭と新大陸という偶然の要因に求めた。', related: ['大分岐', 'カリフォルニア学派'] },
+            'カリフォルニア学派': { summary: 'ヨーロッパ中心史観を批判し、近世におけるアジア経済の高い生産性やダイナミズムを主張する米国の歴史家グループ。', impact: 'ポメランツらが代表。グローバル・ヒストリー研究に大きな影響を与えた。', related: ['大分岐', 'ヨーロッパ中心主義'] },
+            'ヨーロッパ中心主義': { summary: 'ヨーロッパの歴史や価値観を普遍的な基準とみなし、他の地域をそれより劣ったものとして捉える歴史観。', impact: 'カリフォルニア学派などから強く批判され、今日のグローバル・ヒストリー研究では克服すべき課題とされている。', related: ['大分岐', 'カリフォルニア学派'] },
         };
         const japaneseTab = document.getElementById('tab-japanese');
         const westernTab = document.getElementById('tab-western');
@@ -323,6 +293,7 @@
         }
         
         function renderRelatedTerms(relatedArray) {
+            if (!relatedArray) return '';
             const allMainTerms = [...termsData.japanese, ...termsData.western];
             return relatedArray.map(termName => {
                 const mainTermMatch = allMainTerms.find(main => main.title === termName);
@@ -337,25 +308,40 @@
         function showSubModal(termName) {
             const term = subTermsData[termName];
             if (!term) return;
+
+            // If the sub-modal is already open, just update its content for a smoother transition.
+            const wasHidden = subModal.classList.contains('hidden');
+            
             subModalContent.innerHTML = `
-                 <div class="p-6">
+                 <div class="p-6 bg-white rounded-xl">
                     <div class="flex justify-between items-start mb-4">
-                        <h2 class="text-xl font-bold text-gray-800">${termName}</h2>
+                        <h2 class="text-xl font-bold text-teal-700">${termName}</h2>
                         <button class="submodal-close-btn text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <h3 class="font-semibold text-md border-b border-gray-200 pb-1 mb-2 text-gray-700">概要</h3>
+                            <h3 class="font-semibold text-md border-b border-teal-200 pb-1 mb-2 text-teal-800">概要</h3>
                             <p class="text-gray-600 leading-relaxed text-sm">${term.summary}</p>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-md border-b border-gray-200 pb-1 mb-2 text-gray-700">歴史的意義</h3>
+                            <h3 class="font-semibold text-md border-b border-teal-200 pb-1 mb-2 text-teal-800">歴史的意義</h3>
                             <p class="text-gray-600 leading-relaxed text-sm">${term.impact}</p>
                         </div>
+                        ${term.related && term.related.length > 0 ? `
+                        <div>
+                            <h3 class="font-semibold text-md border-b border-teal-200 pb-1 mb-2 text-teal-800">関連用語</h3>
+                            <div class="modal-related-container flex flex-wrap gap-2">
+                                ${renderRelatedTerms(term.related)}
+                            </div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
-            subModal.classList.remove('hidden');
+
+            if (wasHidden) {
+                subModal.classList.remove('hidden');
+            }
         }
 
         function hideModal() {
@@ -368,11 +354,8 @@
             subModal.classList.add('hidden');
         }
 
-        // --- Gemini & Quiz Logic ---
-        async function executeGeminiAction(action, apiKey, geminiResultDiv) {
-            // ... (rest of the Gemini logic, passing geminiResultDiv)
-        }
-        // ... (rest of the Gemini functions)
+        // --- Gemini & Quiz Logic (remains the same) ---
+        // ...
 
         // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -398,15 +381,17 @@
                     showModal(id, category);
                 }
                 
-                // Open sub-modal or switch main modal
+                // Open sub-modal or switch main modal from related term click
                 const relatedButton = e.target.closest('.related-term-button');
                 if(relatedButton) {
                     const { termName, mainId, mainCategory } = relatedButton.dataset;
                     if(mainId && mainCategory) {
+                        // This is a main term, switch the main modal
+                        hideSubModal(); // Close sub-modal if open
                         hideModal();
-                        // Use setTimeout to allow the hide animation to complete before showing the new modal
                         setTimeout(() => showModal(mainId, mainCategory), 150);
                     } else {
+                        // This is a sub-term, show/update the sub-modal
                         showSubModal(termName);
                     }
                 }
@@ -418,6 +403,7 @@
                 if (e.target.matches('.submodal-close-btn') || e.target.closest('.submodal-close-btn')) {
                     hideSubModal();
                 }
+                // Backdrop clicks
                 if (e.target.id === 'modal') hideModal();
                 if (e.target.id === 'subModal') hideSubModal();
                 if (e.target.id === 'apiKeyModal') hideApiKeyModal();
@@ -431,8 +417,10 @@
                         saveApiKey(newApiKey);
                         hideApiKeyModal();
                         if (pendingGeminiAction) {
-                            const geminiResultDiv = document.querySelector('.gemini-result-div');
-                            executeGeminiAction(pendingGeminiAction, newApiKey, geminiResultDiv);
+                            const geminiResultDiv = document.querySelector('#modal-content .gemini-result-div');
+                            if (geminiResultDiv) {
+                                executeGeminiAction(pendingGeminiAction, newApiKey, geminiResultDiv);
+                            }
                             pendingGeminiAction = null;
                         }
                     } else {
@@ -464,9 +452,9 @@
 
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    if (!modal.classList.contains('hidden')) hideModal();
-                    if (!subModal.classList.contains('hidden')) hideSubModal();
                     if (!apiKeyModal.classList.contains('hidden')) hideApiKeyModal();
+                    else if (!subModal.classList.contains('hidden')) hideSubModal();
+                    else if (!modal.classList.contains('hidden')) hideModal();
                 }
             });
 
@@ -582,7 +570,6 @@
                     geminiResultDiv.appendChild(explanationEl);
                 }, { once: true });
             }
-
 
             // Initial Load
             document.getElementById('tab-japanese').click();
