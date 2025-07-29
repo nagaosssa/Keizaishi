@@ -161,9 +161,12 @@
                 <p class="text-xs text-gray-500 mb-4">
                     キーをお持ちでない方は、<a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Google AI Studio</a>から無料で取得できます。
                 </p>
-                <div class="flex justify-end space-x-2">
-                    <button id="apiKeyCancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">キャンセル</button>
-                    <button id="apiKeySave" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">保存して実行</button>
+                <div class="flex justify-between items-center">
+                    <button id="apiKeyClear" class="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md transition">キーを削除</button>
+                    <div class="flex space-x-2">
+                        <button id="apiKeyCancel" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">キャンセル</button>
+                        <button id="apiKeySave" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">保存して実行</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -211,6 +214,7 @@
         const apiKeyInput = document.getElementById('apiKeyInput');
         const apiKeySave = document.getElementById('apiKeySave');
         const apiKeyCancel = document.getElementById('apiKeyCancel');
+        const apiKeyClear = document.getElementById('apiKeyClear');
         
         let currentTerm = null;
         let pendingGeminiAction = null;
@@ -222,6 +226,10 @@
 
         function saveApiKey(key) {
             localStorage.setItem('geminiApiKey', key);
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem('geminiApiKey');
         }
 
         function showApiKeyModal() {
@@ -336,8 +344,9 @@
                     body: JSON.stringify(payload)
                 });
                 if (!response.ok) {
-                    if(response.status === 400){
-                         throw new Error(`APIキーが正しくないか、リクエストに問題があります。`);
+                    if (response.status === 400) {
+                        clearApiKey();
+                        throw new Error(`APIキーが無効です。保存されたキーを削除しました。次回、再度キーを設定してください。`);
                     }
                     throw new Error(`APIリクエストに失敗しました。ステータス: ${response.status}`);
                 }
@@ -355,13 +364,12 @@
                 }
             } catch (error) {
                 console.error('Error calling Gemini API:', error);
-                geminiResultDiv.textContent = `エラーが発生しました: ${error.message} APIキーが有効かご確認ください。`;
+                geminiResultDiv.textContent = `エラーが発生しました: ${error.message}`;
             }
         }
         
         function renderQuiz(quizData) {
             geminiResultDiv.innerHTML = '';
-
             const questionEl = document.createElement('p');
             questionEl.className = 'font-semibold mb-4';
             questionEl.textContent = quizData.question;
@@ -382,7 +390,6 @@
                 
                 const selectedIndex = parseInt(e.target.dataset.index, 10);
                 const correctIndex = quizData.correctIndex;
-
                 Array.from(optionsContainer.children).forEach((button, index) => {
                     button.disabled = true;
                     if (index === correctIndex) {
@@ -391,7 +398,6 @@
                         button.classList.add('incorrect');
                     }
                 });
-
                 const explanationEl = document.createElement('div');
                 explanationEl.id = 'quiz-explanation';
                 explanationEl.innerHTML = `<strong>解説：</strong> ${quizData.explanation}`;
@@ -427,6 +433,13 @@
             } else {
                 alert('APIキーを入力してください。');
             }
+        });
+
+        apiKeyClear.addEventListener('click', () => {
+            clearApiKey();
+            apiKeyInput.value = '';
+            alert('保存されたAPIキーを削除しました。');
+            hideApiKeyModal();
         });
         
         apiKeyCancel.addEventListener('click', () => {
