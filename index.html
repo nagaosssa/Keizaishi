@@ -93,32 +93,35 @@
     </main>
 
     <!-- Feedback Form -->
-    <footer class="bg-white mt-12 py-8 border-t">
+    <footer class="bg-gray-200 mt-12 py-8">
         <div class="container mx-auto px-4">
-            <h2 class="text-xl font-bold text-center text-gray-700 mb-4">フィードバックにご協力ください</h2>
-            <p class="text-center text-gray-600 text-sm mb-6 max-w-2xl mx-auto">
-                この学習サイトをより良くするための改善点、ご感想、追加してほしい用語など、お気軽にお寄せください。
+            <h2 class="text-lg font-bold text-center text-gray-700 mb-3">フィードバックにご協力ください</h2>
+            <p class="text-center text-gray-600 text-xs mb-4 max-w-lg mx-auto">
+                この学習サイトをより良くするためのご感想、改善点、追加してほしい用語など、お気軽にお寄せください。
             </p>
-            <form id="feedback-form" class="max-w-xl mx-auto">
-                <div class="mb-4">
-                    <label for="feedback-type" class="block text-sm font-medium text-gray-700">フィードバックの種類</label>
-                    <select id="feedback-type" name="feedback-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                        <option>サイトの改善点</option>
-                        <option>サイトの感想</option>
-                        <option>追加してほしい語句</option>
-                    </select>
+            <form id="feedback-form" name="feedback" method="POST" data-netlify="true" class="max-w-md mx-auto">
+                <input type="hidden" name="form-name" value="feedback" />
+                <div class="grid grid-cols-1 gap-y-3 sm:grid-cols-3 sm:gap-x-4">
+                    <div class="sm:col-span-1">
+                        <label for="feedback-type" class="block text-xs font-medium text-gray-700">種類</label>
+                        <select id="feedback-type" name="feedback-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+                            <option>サイトの感想</option>
+                            <option>サイトの改善点</option>
+                            <option>追加してほしい語句</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="feedback-content" class="block text-xs font-medium text-gray-700">内容</label>
+                        <textarea id="feedback-content" name="feedback-content" rows="2" class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required></textarea>
+                    </div>
                 </div>
-                <div class="mb-4">
-                    <label for="feedback-content" class="block text-sm font-medium text-gray-700">内容</label>
-                    <textarea id="feedback-content" name="feedback-content" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" required></textarea>
-                </div>
-                <div class="text-center">
-                    <button type="submit" class="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        送信する
+                <div class="text-center mt-4">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        送信
                     </button>
                 </div>
-                <p id="feedback-success-message" class="text-center text-green-600 mt-4 text-sm hidden">
-                    ありがとうございます！メールソフトが起動しますので、内容をご確認の上、送信してください。
+                <p id="feedback-success-message" class="text-center text-green-600 mt-2 text-xs hidden">
+                    フィードバックが送信されました。ありがとうございます！
                 </p>
             </form>
         </div>
@@ -671,8 +674,27 @@
                 }, { once: true });
             }
 
-            // Initial Load
+            // Initial Load & Feedback Form
             document.getElementById('tab-japanese').click();
+            
+            const feedbackForm = document.getElementById('feedback-form');
+            feedbackForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(feedbackForm);
+                const successMessage = document.getElementById('feedback-success-message');
+
+                fetch("/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams(formData).toString(),
+                })
+                .then(() => {
+                    successMessage.classList.remove("hidden");
+                    feedbackForm.reset();
+                    setTimeout(() => successMessage.classList.add("hidden"), 3000);
+                })
+                .catch((error) => alert("エラーが発生しました。もう一度お試しください。"));
+            });
         });
     </script>
 </body>
